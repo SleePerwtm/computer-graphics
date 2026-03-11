@@ -14,8 +14,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Include paths for GLFW/GLEW (adjust if installed elsewhere)
 include_directories("C:/packages/glew-2.3.1/include")
 include_directories("C:/packages/glfw-3.2.1.bin.WIN64/include")
-include_directories("C:/packages/glad/include")
 include_directories("C:/packages/glm")
+include_directories("./liang-b-others")
+
+add_library(glad STATIC ./liang-b-others/glad.c)
+target_include_directories(glad PUBLIC "C:/packages/glad/include")
 
 # Use the MinGW import library for GLFW (libglfw3.a)
 set(GLFW_LIBRARIES "C:/packages/glfw-3.2.1.bin.WIN64/lib-mingw-w64/libglfw3.a")
@@ -34,4 +37,4 @@ add_executable(Bresenham Bresenham.cpp)
 target_link_libraries(Bresenham PRIVATE ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} opengl32)
 
 add_executable(liang-b liang-b.cpp)
-target_link_libraries(liang-b PRIVATE ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} opengl32)
+target_link_libraries(liang-b PRIVATE ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} opengl32 glad)
