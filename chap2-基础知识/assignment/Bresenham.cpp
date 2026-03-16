@@ -55,6 +55,47 @@ vector<int>& BresenhamDrawLine::DrawLine(int x1, int y1, int x2, int y2) {
     vector<int>* pIndexVec = new vector<int>();
 
     ////请补充代码
+    if (x1 == x2 && y1 == y2) { // 两点重合，直接返回
+        DrawPixel(x1, y1, *pIndexVec);
+        return *pIndexVec;
+    }
+
+    bool exchange = abs(y2 - y1) > abs(x2 - x1);
+
+    /* 斜率绝对值大于一，则x和y互换 */
+    if (exchange) {
+        swap_int(&x2, &y2), swap_int(&x1, &y1);
+    }
+
+    /* 需要的话交换起点和终点，保证 x1 < x2 */
+    if (x1 > x2) {
+        swap_int(&x1, &x2), swap_int(&y1, &y2);
+    }
+
+    int sy = y2 > y1 ? 1 : -1;
+
+    int dx = x2 - x1;
+    int dy = abs(y2 - y1);
+
+    int x = x1;
+    int y = y1;
+    int e = -dx;
+
+    while (x <= x2) {
+        if (!exchange) {
+            DrawPixel(x, y, *pIndexVec);
+        } else {
+            DrawPixel(y, x, *pIndexVec);
+        }
+        e += 2 * dy;
+        ++x;
+        if (e > 0) {
+            e -= 2 * dx;
+            y += sy;
+        }
+    }
+
+    return *pIndexVec;
 }
 
 class BuilderBase {
