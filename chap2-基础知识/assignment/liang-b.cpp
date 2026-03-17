@@ -28,11 +28,50 @@ const unsigned int SCR_WIDTH = 2 * range;
 const unsigned int SCR_HEIGHT = 2 * range;
 
 bool clip(float p, float q, float& t0, float& t1) {
-    // 请补充代码
+    if (fabs(p) < 1e-6) {
+        if (q < 0.0f)
+            return false;
+        else
+            return true;
+    }
+    float u = q / p;
+    if (p < 0.0f) {
+        if (u > t1)
+            return false;
+        if (u > t0)
+            t0 = u;
+    } else { // p > 0
+        if (u < t0)
+            return false;
+        if (u < t1)
+            t1 = u;
+    }
+    return true;
 }
 
 bool LiangBarskyClipLine(Point p1, Point p2) {
-    // 请补充代码
+    struct PQ {
+        float p, q;
+    } pq_arr[4];
+    float dx = p2.x - p1.x;
+    float dy = p2.y - p1.y;
+    // clang-format off
+    pq_arr[0].p = -dx, pq_arr[0].q = p1.x - xleft;   // left
+    pq_arr[1].p =  dx, pq_arr[1].q = xright - p1.x;   // right
+    pq_arr[2].p = -dy, pq_arr[2].q = p1.y - ybottom; // bottom
+    pq_arr[3].p =  dy, pq_arr[3].q = ytop - p1.y;     // top
+    // clang-format on
+    float t0 = 0.0f, t1 = 1.0f;
+    for (int i = 0; i < 4; ++i) {
+        if (!clip(pq_arr[i].p, pq_arr[i].q, t0, t1))
+            return false;
+    }
+
+    P0.x = p1.x + t0 * dx;
+    P0.y = p1.y + t0 * dy;
+    P1.x = p1.x + t1 * dx;
+    P1.y = p1.y + t1 * dy;
+    return true;
 }
 
 void processInput(GLFWwindow* window);
@@ -142,9 +181,9 @@ int main() {
                           (void*)0);
     glEnableVertexAttribArray(0);
 
-    Shader shader_window("v.glsl", "f_window.glsl");
-    Shader shader_line("v.glsl", "f_line.glsl");
-    Shader shader_clip("v.glsl", "f_clip.glsl");
+    Shader shader_window("liang-b-others/v.glsl", "liang-b-others/f_window.glsl");
+    Shader shader_line("liang-b-others/v.glsl", "liang-b-others/f_line.glsl");
+    Shader shader_clip("liang-b-others/v.glsl", "liang-b-others/f_clip.glsl");
 
     glLineWidth(3.0f);
     glEnable(GL_DEPTH_TEST);
