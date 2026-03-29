@@ -293,6 +293,14 @@ void subdivide() {
                  (vertex[p3].z + vertex[p4].z) / 8;
 
             // 补充完整代码
+            Vertex v;
+            v.x = qx;
+            v.y = qy;
+            v.z = qz;
+            new_vertex.push_back(v);
+            int idx = (int)new_vertex.size() - 1; // 新点的索引
+            map1[p1][p2] = idx;
+            map1[p2][p1] = idx;
         }
     }
 
@@ -307,6 +315,36 @@ void subdivide() {
         f = map1[a][c];
 
         // 补充完整代码
+        int d_idx = d;
+        int e_idx = e;
+        int f_idx = f;
+        Face f1; // (a, d, f)
+        f1.num = 3;
+        f1.order[0] = a;
+        f1.order[1] = d_idx;
+        f1.order[2] = f_idx;
+        new_face.push_back(f1);
+
+        Face f2; // (d, b, e)
+        f2.num = 3;
+        f2.order[0] = d_idx;
+        f2.order[1] = b;
+        f2.order[2] = e_idx;
+        new_face.push_back(f2);
+
+        Face f3; // (f, e, c)
+        f3.num = 3;
+        f3.order[0] = f_idx;
+        f3.order[1] = e_idx;
+        f3.order[2] = c;
+        new_face.push_back(f3);
+
+        Face f4; // (d, e, f)
+        f4.num = 3;
+        f4.order[0] = d_idx;
+        f4.order[1] = e_idx;
+        f4.order[2] = f_idx;
+        new_face.push_back(f4);
     }
 
     n_face = new_face.size();
