@@ -59,7 +59,18 @@ int main(int argc, char* argv[]) {
 }
 
 // 补充 de Casteljau的递归函数计算实现
-point Bezier::p_cal(int r, int i, float t) {}
+point Bezier::p_cal(int r, int i, float t) {
+    if (r == 0) {
+        return control[i];
+    } else {
+        point temp;
+        temp.x = (1 - t) * problem.p_cal(r - 1, i, t).x +
+                t * problem.p_cal(r - 1, i + 1, t).x;
+        temp.y = (1 - t) * problem.p_cal(r - 1, i, t).y +
+                t * problem.p_cal(r - 1, i + 1, t).y;
+        return temp;
+    }
+}
 
 // 绘图函数
 void draw() {
