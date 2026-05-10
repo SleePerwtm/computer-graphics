@@ -102,13 +102,18 @@ struct MyMesh {
         return false;
     }
     Edge randomEdge() {
-        int rd = rand() % n_edges, i = 0;
+        if (Edges.empty())
+            return Edge(-1, -1);
+
+        int rd = rand() % static_cast<int>(Edges.size()), i = 0;
         for (set<Edge>::iterator it = Edges.begin(); it != Edges.end();
              it++, i++) {
             if (rd != i)
                 continue;
             return *it;
         }
+
+        return *Edges.begin();
     }
 };
 MyMesh mesh;
@@ -123,6 +128,8 @@ void initGL() {
     glEnable(GL_LIGHT0);
 
     // ------------------- Display List
+    if (showWireList != 0)
+        glDeleteLists(showWireList, 1);
     showWireList = glGenLists(1);
     // SHOW WIRE
     glNewList(showWireList, GL_COMPILE);
@@ -196,11 +203,61 @@ void mySpecial(int key, int x, int y) {
     glutPostRedisplay();
 }
 void simplify() {
+    if (mesh.Edges.empty())
+        return;
+    // 随机选一条边并尝试收缩（一次收缩仅处理一条边）
     Edge rde = mesh.randomEdge();
-    int n = mesh.n_edges;
+    // 验证返回的边是否有效
+    if (rde.v1 < 0 || rde.v2 < 0)
+        return;
+    if (rde.v1 >= static_cast<int>(mesh.Points.size()) ||
+        rde.v2 >= static_cast<int>(mesh.Points.size()))
+        return;
+
     int v1 = rde.v1, v2 = rde.v2;
     cout << "Collapse " << v1 << " to " << v2 << endl;
-    // 补充代码
+
+    // 将 v1 合并到 v2：这里取中点作为新位置（演示用，非最优策略）
+    Point& p1 = mesh.Points[v1];
+    Point& p2 = mesh.Points[v2];
+    p2.x = 0.5f * (p1.x + p2.x);
+    p2.y = 0.5f * (p1.y + p2.y);
+    p2.z = 0.5f * (p1.z + p2.z);
+
+    // 重建边集合：把所有以 v1 为端点的边重接到 v2，去掉自环，并统一端点顺序以便 set 去重
+    set<Edge> newEdges;
+    vector<Edge> oldEdges(mesh.Edges.begin(), mesh.Edges.end());
+    for (size_t i = 0; i < oldEdges.size(); ++i) {
+        int a = oldEdges[i].v1;
+        int b = oldEdges[i].v2;
+
+        // 跳过被收缩的那条原始边
+        if ((a == v1 && b == v2) || (a == v2 && b == v1))
+            continue;
+
+        // 如果某个端点是 v1，则重定向到 v2
+        if (a == v1)
+            a = v2;
+        if (b == v1)
+            b = v2;
+
+        // 丢弃自环（两端相同）
+        if (a == b)
+            continue;
+
+        // 规范化顺序 (小, 大) 以利用 set 去重
+        if (a > b) {
+            int tmp = a;
+            a = b;
+            b = tmp;
+        }
+
+        newEdges.insert(Edge(a, b));
+    }
+
+    // 用新边集合替换旧集合并更新计数
+    mesh.Edges.swap(newEdges);
+    mesh.n_edges = static_cast<int>(mesh.Edges.size());
 }
 void restart() {
     mesh.Points.clear();
@@ -272,6 +329,8 @@ int read_mesh() {
             mesh_src.from_vertex_handle(mesh_src.halfedge_handle(*eit, 0));
         mesh.AddEdge(vh1.idx(), vh2.idx());
     }
+
+    return 0;
 }
 
 int main(int argc, char** argv) {
