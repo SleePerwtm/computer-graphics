@@ -1,4 +1,4 @@
-﻿/*************************************************************
+/*************************************************************
 @Author: 韩世杰
 @Date:2019-08-20
 @Description:例题3.3.3-1 Loop细分曲面
@@ -22,7 +22,7 @@ https://blog.csdn.net/fengluod/article/details/83821348
 // #include <GLUT/GLUT.h>
 
 // Windows10  VC2017环境
-#include <glut.h>
+#include <GL/glut.h>
 
 // 共同使用的库
 #include <assert.h>
