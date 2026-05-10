@@ -155,15 +155,36 @@ void mySpecial(int key, int x, int y) {
 
 float smooth() {
     float err = -1;
+    // 清空上一轮计算的质心列表
     cogs.clear();
     v_end = mesh.vertices_end();
+    // 对每个顶点：计算其邻接顶点的平均位置（质心），并保存到 cogs
     for (v_it = mesh.vertices_begin(); v_it != v_end; ++v_it) {
-        // �벹�����
+        cog = MyMesh::Point(0.0f, 0.0f, 0.0f);
+        valence = 0.0f;
+        // 累加邻接顶点的位置
+        for (vv_it = mesh.vv_iter(*v_it); vv_it.is_valid(); ++vv_it) {
+            cog += mesh.point(*vv_it);
+            ++valence;
+        }
+        // 取平均（若无邻接则保持原位）
+        if (valence > 0.0f)
+            cog /= valence;
+        else
+            cog = mesh.point(*v_it);
+        // 把计算得到的质心保存在列表中，后续统一更新位置
+        cogs.push_back(cog);
     }
     for (v_it = mesh.vertices_begin(), cog_it = cogs.begin(); v_it != v_end;
          ++v_it, ++cog_it)
+        // 对非边界顶点，用邻接质心替换位置，同时记录最大位移（用于收敛判断）
         if (!mesh.is_boundary(*v_it)) {
-            // �벹�����
+            MyMesh::Point delta = mesh.point(*v_it) - *cog_it;
+            float d = delta.norm();
+            if (d > err)
+                err = d;
+            // 更新顶点位置到邻接平均位置（Laplacian 平滑的直接实现）
+            mesh.set_point(*v_it, *cog_it);
         }
     return err;
 }
