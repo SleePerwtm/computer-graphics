@@ -145,7 +145,7 @@ int main() {
 
     // 读取纹理
     unsigned one, two, three;
-    one = loadTexture("one.png");
+    one = loadTexture("yorushika-logo.png");
     two = loadTexture("two.png");
     three = loadTexture("three.png");
 
